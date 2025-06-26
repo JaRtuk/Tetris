@@ -14,8 +14,6 @@ file(GLOB_RECURSE SOURCE_FILES
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_include_directories(${PROJECT_NAME} PRIVATE external/glfw/include)
-
 set (GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set (GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE) 
 set (GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -24,6 +22,14 @@ set (GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(external/glfw)
-
 target_link_libraries(${PROJECT_NAME} glfw)
+
+add_subdirectory(external/glad)
+target_link_libraries(${PROJECT_NAME} glad)
+
+target_include_directories(${PROJECT_NAME}
+  PRIVATE
+    external/glfw/include
+    external/glad/include
+)
 
