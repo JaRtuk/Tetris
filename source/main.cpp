@@ -3,8 +3,9 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-
 #include <iostream>
+
+#include "Renderer/ShaderProgram.hpp"
 
 GLfloat points[] = {
      0.0f,  0.5f, 0.0f,
@@ -54,24 +55,24 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scanecode, int action, in
     }
 }
 
-void RotatePoints(GLfloat *points, float angle) 
-{
-    double theta = angle * M_PI / 180.0;
+// void RotatePoints(GLfloat *points, float angle) 
+// {
+//     double theta = angle * M_PI / 180.0;
     
-    float center_x = (points[0] + points[3] + points[6]) / 3;
-    float center_y = (points[1] + points[4] + points[7]) / 3;
+//     float center_x = (points[0] + points[3] + points[6]) / 3;
+//     float center_y = (points[1] + points[4] + points[7]) / 3;
 
-    for(int it = 0; it < 3; ++it)
-    {
-        float translated_x = points[it * 3] - center_x;
-        float translated_y = points[it * 3 + 1] - center_y;
-        float new_x = translated_x * cos(theta) - translated_y * sin(theta);
-        float new_y = translated_x * sin(theta) + translated_y * cos(theta);
+//     for(int it = 0; it < 3; ++it)
+//     {
+//         float translated_x = points[it * 3] - center_x;
+//         float translated_y = points[it * 3 + 1] - center_y;
+//         float new_x = translated_x * cos(theta) - translated_y * sin(theta);
+//         float new_y = translated_x * sin(theta) + translated_y * cos(theta);
 
-        points[it * 3] = new_x + center_x;
-        points[it * 3 + 1] = new_y + center_y;
-    }
-}
+//         points[it * 3] = new_x + center_x;
+//         points[it * 3 + 1] = new_y + center_y;
+//     }
+// }
 
 int main(void)
 {
@@ -109,21 +110,15 @@ int main(void)
 
     glClearColor(0.f, 0.f, 0.f, 1.f); 
 
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertex_shader, nullptr);
-    glCompileShader(vs);
+    std::string  vertexShader(vertex_shader);
+    std::string fragmentShader(fragment_shader);
+    Renderer::ShaderProgram shaderProgram(vertexShader, fragmentShader);
 
-
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragment_shader, nullptr);
-    glCompileShader(fs);
-
-    GLuint shader_programm = glCreateProgram();
-    glAttachShader(shader_programm, vs);
-    glAttachShader(shader_programm, fs);
-    glLinkProgram(shader_programm);
-
-    glDeleteShader(vs);   glDeleteShader(fs);
+    if (!shaderProgram.isCompiled())
+    {
+        std::cerr << "Cant create shader program!" << std::endl;
+        return -1;
+    }
 
     GLuint points_vbo = 0;
     glGenBuffers(1, &points_vbo);
@@ -154,13 +149,13 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
 
-        RotatePoints(points, 1.f);
+        // RotatePoints(points, 1.f);
 
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+        // glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+        // glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
 
-        glUseProgram(shader_programm);
+        shaderProgram.use();
         glBindVertexArray(vao); 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
