@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "Renderer/ShaderProgram.hpp"
+#include "Resources/ResourceManager.hpp"
 
 GLfloat points[] = {
      0.0f,  0.5f, 0.0f,
@@ -18,24 +19,6 @@ GLfloat colors[] = {
     0.f, 1.f, 0.f, 
     0.f, 0.f, 1.f
 };
-
-const char* vertex_shader = 
-"#version 460\n"
-"layout(location = 0) in vec3 vertex_position;"
-"layout(location = 1) in vec3 vertex_color;"
-"out vec3 color;"
-"void main() {"
-"   color = vertex_color;"
-"   gl_Position = vec4(vertex_position, 1.0);"
-"}";
-
-const char* fragment_shader = 
-"#version 460\n"
-"in vec3 color;"
-"out vec4 frag_color;"
-"void main() {"
-"   frag_color = vec4(color, 1.0);"
-"}";
 
 int g_window_size_x = 640;
 int g_window_size_y = 480;
@@ -74,8 +57,14 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scanecode, int action, in
 //     }
 // }
 
-int main(void)
+int main(int argc, char** argv)
 {
+    char i = 92;
+
+    std::cout << i << std::endl;
+
+    ResourceManager resourceManager(argv[0]);
+    
     if (!glfwInit())
     {
         std::cout << "glfw dont init (glfwInit)" << std::endl;
@@ -110,8 +99,8 @@ int main(void)
 
     glClearColor(0.f, 0.f, 0.f, 1.f); 
 
-    std::string  vertexShader(vertex_shader);
-    std::string fragmentShader(fragment_shader);
+    std::string  vertexShader; //(vertex_shader);
+    std::string fragmentShader; //(fragment_shader);
     Renderer::ShaderProgram shaderProgram(vertexShader, fragmentShader);
 
     if (!shaderProgram.isCompiled())
