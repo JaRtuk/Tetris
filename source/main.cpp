@@ -59,12 +59,6 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scanecode, int action, in
 
 int main(int argc, char** argv)
 {
-    char i = 92;
-
-    std::cout << i << std::endl;
-
-    ResourceManager resourceManager(argv[0]);
-    
     if (!glfwInit())
     {
         std::cout << "glfw dont init (glfwInit)" << std::endl;
@@ -99,63 +93,62 @@ int main(int argc, char** argv)
 
     glClearColor(0.f, 0.f, 0.f, 1.f); 
 
-    std::string  vertexShader; //(vertex_shader);
-    std::string fragmentShader; //(fragment_shader);
-    Renderer::ShaderProgram shaderProgram(vertexShader, fragmentShader);
-
-    if (!shaderProgram.isCompiled())
     {
-        std::cerr << "Cant create shader program!" << std::endl;
-        return -1;
+        ResourceManager resourceManager(argv[0]);
+        auto pDefaultShaderProgram = resourceManager.loadShaders("DefaultShader", "resurses/shaders/vertex.txt", "resurses/shaders/fragment.txt");
+        if (!pDefaultShaderProgram)
+        {
+            std::cerr << "Can`t create shader program: " << "DefaultShader" << std::endl;
+            return -1;
+        }
+
+        GLuint points_vbo = 0;
+        glGenBuffers(1, &points_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+        GLuint colors_vbo = 0;
+        glGenBuffers(1, &colors_vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+        glBufferData(GL_ARRAY_BUFFER,sizeof(colors), colors, GL_STATIC_DRAW);
+
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+
+        while (!glfwWindowShouldClose(pWindow))
+        {
+            /* Render here */
+            glClear(GL_COLOR_BUFFER_BIT);
+
+
+            // RotatePoints(points, 1.f);
+
+            // glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+            // glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+
+
+            pDefaultShaderProgram->use();
+            glBindVertexArray(vao); 
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+
+
+            /* Swap front and back buffers */
+            glfwSwapBuffers(pWindow);
+
+            /* Poll for and process events */
+            glfwPollEvents();
+        }
     }
-
-    GLuint points_vbo = 0;
-    glGenBuffers(1, &points_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-    GLuint colors_vbo = 0;
-    glGenBuffers(1, &colors_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-    glBufferData(GL_ARRAY_BUFFER,sizeof(colors), colors, GL_STATIC_DRAW);
-
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, colors_vbo);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-
-    while (!glfwWindowShouldClose(pWindow))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-
-        // RotatePoints(points, 1.f);
-
-        // glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        // glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-
-        shaderProgram.use();
-        glBindVertexArray(vao); 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(pWindow);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
-
     glfwTerminate();
     return 0;
 }
